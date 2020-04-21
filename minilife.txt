@@ -1,0 +1,64 @@
+'Life algorithm from https://archive.org/details/byte-magazine-1979-01/page/n91
+GR.3
+HY=10:'MAX 19
+HX=20:'MAX 39
+
+DIM OLD(HY+1,HX+1),NW(HY+1,HX+1)
+
+'draw bounding box
+COLOR 3:PLOT 0,0:DRAWTO HX+1,0:DRAWTO HX+1,HY+1:DRAWTO 0,HY+1:DRAWTO 0,0
+?"MINILIFE"
+
+DO
+	X=1:Y=1:?"Edit mode. Place cells then SPACE."
+	POKE 764,255
+		WHILE PEEK(764)<>33
+			COLOR NW(Y,X):PLOT X,Y
+			S=STICK(0)
+			Y=Y+((S=13)-(S=14))
+			X=X+(S=7)-(S=11)
+			IF X<1:X=HX:ENDIF
+			IF Y<1:Y=HY:ENDIF
+			IF X>HX:X=1:ENDIF
+			IF Y>HY:Y=1:ENDIF
+			IF(STRIG(0)=0)
+				NW(Y,X)=NOT NW(Y,X)
+				PAUSE 3
+			ENDIF
+			COLOR 2:PLOT X,Y
+			PAUSE 4
+		WEND
+
+	IT=0:?"Generating life. SPACE to stop."
+	POKE 764,255
+		DO
+			'draw the current colony
+			FOR Y = 1 TO HY
+				FOR X = 1 TO HX
+					COLOR 3:PLOT X,Y
+					OLD(Y,X)=NW(Y,X)
+					COLOR OLD(Y,X)
+					PLOT X,Y
+				NEXT X
+			NEXT Y
+
+			IF PEEK(764)=33:EXIT:ENDIF
+
+			'calculate the next generation
+			FOR Y = 1 TO HY
+					FOR X = 1 TO HX
+			SUM=OLD(Y-1,X-1)+OLD(Y-1,X)+OLD(Y-1,X+1)+OLD(Y,X-1)+OLD(Y,X+1)+OLD(Y+1,X-1)+OLD(Y+1,X)+OLD(Y+1,X+1)
+						IF SUM=3
+							NW(Y,X)=1
+						ELSE
+							IF SUM=2
+								NW(Y,X)=OLD(Y,X)
+							ELSE
+								NW(Y,X)=0
+							ENDIF
+						ENDIF
+					NEXT X
+				NEXT Y
+			IT=IT+1:?IT
+		LOOP
+LOOP
